@@ -13,10 +13,10 @@ connectedToMongodb()
 app.use(express.json())
 app.use(cookieParser())
 
-app.use("/user",userRoute)
+app.use("/user",userRoute) 
 
 app.get("/",(req,res) => {
-     res.json({message : "welcome user"})
+     res.json({message : "welcome to my website"})
 })
 
 app.listen(port,() => console.log(`port is listining ${port}`))
