@@ -1,5 +1,5 @@
 import mongoose , {Model, Schema} from "mongoose";
-import { TuserDto } from "../dto/user";
+import { TuserDto } from "@/dto/user";
 
 const userSchema = new Schema<TuserDto>({
     username : {
@@ -18,7 +18,7 @@ const userSchema = new Schema<TuserDto>({
         required : true,
         trim  : true
     }
-});
+},{timestamps : true});
 
 const userModel:Model<TuserDto> = mongoose.model("User",userSchema)
 export default userModel;

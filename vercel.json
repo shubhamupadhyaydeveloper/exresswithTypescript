@@ -4,7 +4,7 @@
       { "src": "package.json", "use": "@vercel/node" }
     ],
     "routes": [
-      { "src": "/(.*)", "dest": "dist/app.js" }
+      { "src": "/(.*)", "dest": "./dist/app.js" }
     ]
   }
   

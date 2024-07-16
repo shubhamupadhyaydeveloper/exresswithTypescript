@@ -1,10 +1,11 @@
 import { Response } from "express"
 import jwt from "jsonwebtoken"
 import { Types } from "mongoose"
+import { JWT_TOKEN } from "./variable"
 
 const createToken = async (userId : Types.ObjectId,res:Response) => {
     try {
-     const token = jwt.sign({userId},process.env.JWT_TOKEN!, {
+     const token = jwt.sign({userId},JWT_TOKEN!, {
         expiresIn : "15d"
      })
 
