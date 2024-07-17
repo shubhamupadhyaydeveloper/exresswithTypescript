@@ -1,7 +1,8 @@
 import mongoose , {Model, Schema} from "mongoose";
-import { TuserDto } from "@/dto/user";
+import { userModelType } from "@/validation/user";
+import { string } from "joi";
 
-const userSchema = new Schema<TuserDto>({
+const userSchema = new Schema<userModelType>({
     username : {
         type : String,
         required: true,
@@ -17,8 +18,39 @@ const userSchema = new Schema<TuserDto>({
         type : String,
         required : true,
         trim  : true
-    }
+    },
+    otp : {
+       type : String,
+       required : true
+    },
+    otpExpiry : {
+        type : Date,
+        required : true,
+        default : Date.now()
+    },
+    isVerified : {
+        type : Boolean,
+        default : false
+    },
+    forgetCode : {
+        type : String
+    },
+    forgetCodeExpiry : {
+        type : Date
+    },
+    followers : [{
+        type : String,
+        default : []
+    }],
+    following : [{
+        type : String,
+        default : []
+    }],
+    playlist : [{
+        type : String,
+        default : []
+    }],
 },{timestamps : true});
 
-const userModel:Model<TuserDto> = mongoose.model("User",userSchema)
+const userModel:Model<userModelType> = mongoose.model("User",userSchema)
 export default userModel;

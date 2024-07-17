@@ -1,6 +1,5 @@
 import express from 'express'
 import userRoute from "@/routes/user.route"
-import blogRoute from "@/routes/blog.route"
 import 'dotenv/config'
 import cookieParser from "cookie-parser"
 import { connectedToMongodb } from '@/lib/mongo.connect'
@@ -14,8 +13,7 @@ connectedToMongodb()
 app.use(express.json())
 app.use(cookieParser())
 
-app.use("/user",userRoute) 
-app.use("/blog",blogRoute)
+app.use("/auth",userRoute) 
 
 app.get("/",(req,res) => {
  res.json({message : "welcome to my website"})
