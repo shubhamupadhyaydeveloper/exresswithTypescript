@@ -50,6 +50,10 @@ const userSchema = new Schema<userModelType>({
         type : String,
         default : []
     }],
+    profileImage : {
+        type : String,
+        default :  ""
+    }
 },{timestamps : true});
 
 const userModel:Model<userModelType> = mongoose.model("User",userSchema)

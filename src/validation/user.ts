@@ -1,7 +1,7 @@
 import J from "joi"
 import { Request } from "express"
 
-export type userModelType = Request & {
+export type userModelType = {
    username : string,
    email : string,
    password : string,
@@ -12,7 +12,8 @@ export type userModelType = Request & {
    isVerified : boolean,
    followers : string[],
    following : string[],
-   playlist : string[]
+   playlist : string[],
+   profileImage : string
 }
 
 
