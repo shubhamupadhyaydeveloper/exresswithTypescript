@@ -1,5 +1,7 @@
 import J from "joi"
 import { Request } from "express"
+import { Types } from "mongoose"
+
 
 export type userModelType = {
    username : string,
@@ -12,10 +14,12 @@ export type userModelType = {
    isVerified : boolean,
    followers : string[],
    following : string[],
-   playlist : string[],
-   profileImage : string
+   playlist : Types.ObjectId[],
+   profileImage : {
+      secure_url : string,
+      public_id : string
+   }
 }
-
 
 
 export const signUpClientDataType = J.object({

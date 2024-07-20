@@ -47,12 +47,14 @@ const userSchema = new Schema<userModelType>({
         default : []
     }],
     playlist : [{
-        type : String,
+        type : mongoose.Schema.Types.ObjectId,
+        ref : "Playlist",
         default : []
     }],
     profileImage : {
-        type : String,
-        default :  ""
+        type : Object,
+        secure_url : String,
+        public_id : String,
     }
 },{timestamps : true});
 
