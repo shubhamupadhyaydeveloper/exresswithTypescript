@@ -36,7 +36,11 @@ const songSchema = new Schema<songModelType>({
      likes : [{
         type : mongoose.Schema.Types.ObjectId,
         ref : "User"
-     }]
+     }],
+     singer : {
+      type : String,
+      required : true
+     }
 },{timestamps : true})
 
 export const songModel:Model<songModelType> = mongoose.model("Song",songSchema)

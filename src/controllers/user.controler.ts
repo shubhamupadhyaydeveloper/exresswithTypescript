@@ -11,14 +11,19 @@ export async function signUpUser(
   try {
     const { username, email, password } = req.body;
 
+    console.log(username,email,password)
+
     const userFound = await userModel.findOne({ email, isVerified: false });
 
     const alreadyVerified = await userModel.findOne({
       email,
       isVerified: true,
     });
-    if (alreadyVerified)
+   
+    if (alreadyVerified) {
+      console.log(alreadyVerified)
       return res.status(400).json({ error: "User already verified" });
+    }
 
     const codeGenerator = (): string => {
       return Math.floor(100000 + Math.random() * 900000).toString();
@@ -37,6 +42,7 @@ export async function signUpUser(
 
       await userFound.save();
       sendEmail({ code: userFound.otp, email, title: "Signup", username });
+      return res.status(201).json({ message: "check your mail for verification" });
     }
 
     const createUser = new userModel({
@@ -51,7 +57,7 @@ export async function signUpUser(
 
     sendEmail({ code: createUser.otp, email, title: "Signup", username });
 
-    res.status(201).json({ message: "check your mail for verification" });
+    return res.status(201).json({ message: "check your mail for verification" });
   } catch (error: any) {
     console.log("error in sign upUser");
     res.json({ success: false, message: error.message });
@@ -64,9 +70,12 @@ export async function loginUser(
 ) {
   try {
     const { email, password } = req.body;
-    const userFound = await userModel.findOne({ email , isVerified : true });
+    const userFound = await userModel.findOne({ email, isVerified: true });
 
-    if (!userFound) return res.status(404).json({ message: "user not found please verify your email" });
+    if (!userFound)
+      return res
+        .status(404)
+        .json({ message: "user not found please verify your email" });
 
     const matchedPassword = await bcrypt.compare(password, userFound.password);
     if (!matchedPassword)
@@ -76,7 +85,7 @@ export async function loginUser(
       createToken(userFound._id, res);
     }
 
-    res
+   return res
       .status(200)
       .json({ userDetail: userFound, message: "sign in successful" });
   } catch (error: any) {
@@ -109,12 +118,15 @@ export async function verifyEmail(
 
     const notExpired = new Date(userFound.otpExpiry) > new Date();
 
-    if(!notExpired) return res.status(400).json({message : "code time is expired try again"})
+    if (!notExpired)
+      return res
+        .status(400)
+        .json({ message: "code time is expired try again" });
 
     if (userFound && notExpired) {
       userFound.isVerified = true;
       userFound.otpExpiry = new Date(0);
-      userFound.otp = ""
+      userFound.otp = "";
 
       await userFound.save();
 
@@ -162,30 +174,35 @@ export async function forgetPassword(
   }
 }
 
-export async function resetPassword(req: Request<{token : string},{},{password : string}>, res: Response) {
+export async function resetPassword(
+  req: Request<{ token: string }, {}, { password: string }>,
+  res: Response
+) {
   try {
+    const { token } = req.params;
+    const { password } = req.body;
 
-    const {token} = req.params
-    const {password} = req.body
+    const userFound = await userModel.findOne({ forgetCode: token });
+    if (!userFound)
+      return res.status(404).json({ message: "invalid token user not found" });
 
-    const userFound = await userModel.findOne({forgetCode : token})
-    if(!userFound) return res.status(404).json({message :"invalid token user not found"})
+    const codeExpired = new Date(userFound.forgetCodeExpiry) > new Date();
+    if (codeExpired)
+      return res
+        .status(400)
+        .json({ message: "code time is expired try again" });
 
-    const codeExpired = new Date(userFound.forgetCodeExpiry) > new Date()
-    if(codeExpired) return res.status(400).json({message : "code time is expired try again"})
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const hashedPassword = await bcrypt.hash(password , 10)
+    if (userFound && codeExpired) {
+      userFound.password = hashedPassword;
+      userFound.forgetCode = "";
+      userFound.forgetCodeExpiry = new Date(0);
 
-    if(userFound && codeExpired) {
-       userFound.password = hashedPassword
-       userFound.forgetCode = "";
-       userFound.forgetCodeExpiry = new Date(0);
-       
-       await userFound.save()
+      await userFound.save();
 
-       res.status(201).json({message : "password update successful"})
+      res.status(201).json({ message: "password update successful" });
     }
-
   } catch (error: any) {
     console.log("error in resetPassword", error?.message);
   }

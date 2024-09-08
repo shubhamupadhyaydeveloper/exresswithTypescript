@@ -11,7 +11,7 @@ const router = Router();
 
 router.post("/update-profile", upload.single("image_url"), updateProfile);
 router.post(
-  "/create-audio",
+  "/create-song",
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
     { name: "video", maxCount: 1 },

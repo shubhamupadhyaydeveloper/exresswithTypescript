@@ -15,5 +15,6 @@ export type songModelType = {
          public_id : string
      },
      likes : ObjectId[],
-     category : songCategory
+     category : songCategory,
+     singer : string
 }

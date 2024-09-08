@@ -9,6 +9,7 @@ import { songCategory } from "@/validation/song";
 import { likedModel } from "@/models/liked.model";
 import { likedModelType } from "@/validation/liked";
 import { playlistModel } from "@/models/playlist.model";
+import historyModel from "@/models/history.model";
 
 export async function updateProfile(
   req: Request<{}, {}, { username: string; password: string }>,
@@ -82,7 +83,7 @@ export async function createAudio(
   req: Request<
     {},
     {},
-    { title: string; about: string; category: songCategory }
+    { title: string; about: string; category: songCategory , singer : string }
   >,
   res: Response
 ) {
@@ -93,18 +94,29 @@ export async function createAudio(
     const currentUser = req.user;
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    const { title, about, category } = req.body;
+    const { title, about, category , singer } = req.body;
 
     const createSong = new songModel({
       title,
       about,
       owner: currentUser._id,
       category,
+      singer
     });
 
     await createSong.save();
 
     if (files.thumbnail) {
+      const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg"];
+
+      if (!allowedMimeTypes.includes(files.thumbnail[0]?.mimetype)) {
+        return res
+          .status(400)
+          .json({
+            message: "Invalid thumbnail file type. Only images are allowed.",
+          });
+      }
+
       const arrayBuffer: any = files.thumbnail[0]?.buffer;
       const buffer = new Uint8Array(arrayBuffer);
 
@@ -233,22 +245,154 @@ export async function togglePlaylist(
 }
 
 export async function updatePlaylist(
-  req: Request<{}, {}, { title : string , visibility : "Public" | "Private",playlistId : Types.ObjectId }>,
+  req: Request<
+    {},
+    {},
+    {
+      title: string;
+      visibility: "Public" | "Private";
+      playlistId: Types.ObjectId;
+    }
+  >,
   res: Response
 ) {
   try {
-    const {title,visibility,playlistId} = req.body
-    
-    const playlistFound = await playlistModel.findById(playlistId)
-    if(!playlistFound ) return res.status(404).json({message : "playlist not found"})
+    const { title, visibility, playlistId } = req.body;
 
-    playlistFound.title = title || playlistFound.title,
-    playlistFound.visibility = visibility || playlistFound.visibility
+    const playlistFound = await playlistModel.findById(playlistId);
+    if (!playlistFound)
+      return res.status(404).json({ message: "playlist not found" });
+
+    (playlistFound.title = title || playlistFound.title),
+      (playlistFound.visibility = visibility || playlistFound.visibility);
 
     await playlistFound.save();
 
-    return res.status(201).json({message : "update playlist successful"})
+    return res.status(201).json({ message: "update playlist successful" });
   } catch (error: any) {
     console.log("error in updatePlaylist", error?.message);
+  }
+}
+
+export async function deletePlaylist(
+  req: Request<{}, {}, { playlistId: Types.ObjectId }>,
+  res: Response
+) {
+  try {
+    const { playlistId } = req.body;
+    const currentUser = req.user;
+
+    const playlistFound = await playlistModel.findById(playlistId);
+    if (!playlistFound)
+      return res.status(404).json({ message: "playlist not found" });
+
+    await playlistModel.findByIdAndDelete(playlistId);
+
+    await userModel.updateOne(
+      { _id: currentUser?._id },
+      { $pull: { playlist: playlistId } }
+    );
+
+    return res.status(201).json({ message: "delete playlist successful" });
+  } catch (error: any) {
+    console.log("error in deletePlaylist", error?.message);
+  }
+}
+
+export async function playlistByProfile(
+  req: Request<{}, {}, {}>,
+  res: Response
+) {
+  try {
+    const currentUser = req.user;
+
+    const findPlayist = await playlistModel
+      .find({ owner: currentUser?._id })
+      .populate("songs");
+
+    return res.status(201).json({ playlists: findPlayist });
+  } catch (error: any) {
+    console.log("error in playlistByProfile", error?.message);
+  }
+}
+
+// follow and unfollow
+export async function toggleFollowAndUnfollow(
+  req: Request<
+    {},
+    {},
+    {
+      secondUserId: Types.ObjectId;
+    }
+  >,
+  res: Response
+) {
+  try {
+    const currentUser = req.user;
+    const { secondUserId } = req.body;
+    const secondUser = await userModel.findById(secondUserId);
+
+    const isFollowing = currentUser?.followers.includes(currentUser?._id);
+
+    if (isFollowing) {
+      // unfollow
+      await userModel.updateOne(
+        { _id: secondUserId },
+        { $pull: { following: currentUser?._id } }
+      );
+
+      await userModel.updateOne(
+        { _id: currentUser?._id },
+        { $pull: { followers: secondUserId } }
+      );
+
+      return res.status(200).json({ message: "user unfollow successful" });
+    } else {
+      // follow user
+
+      await userModel.updateOne(
+        { _id: secondUserId },
+        { $addToSet: { following: currentUser?._id } }
+      );
+
+      await userModel.updateOne(
+        { _id: currentUser?._id },
+        { $addToSet: { followers: secondUserId } }
+      );
+      return res.status(200).json({ message: "user follow successful" });
+    }
+  } catch (error: any) {
+    console.log("error in toggleFollowAndUnfollow", error?.message);
+  }
+}
+
+export async function userHistory(
+  req: Request<
+    {},
+    {},
+    { userId: Types.ObjectId; songId: Types.ObjectId; progress: number }
+  >,
+  res: Response
+) {
+  try {
+     
+    const {userId,songId,progress} = req.body
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const existingPlay = await historyModel.findOneAndUpdate(
+      {userId , songId , date : {$gt : thirtyDaysAgo}},
+      {$set : {date : new Date(),progress}},
+      {new : true}
+    )
+
+    if(!existingPlay) {
+       const createPlay = new historyModel({userId,songId,progress}) 
+       await createPlay.save()
+      }
+
+    await historyModel.deleteMany({ userId, timestamp: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } });
+
+  } catch (error: any) {
+    console.log("error in updatehistory", error?.message);
   }
 }

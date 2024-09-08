@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { RESEND_URL } from "./variable";
 import { emailTemplate } from "./emailTemplate";
 
-const resend = new Resend("re_2BPd4S7E_CMxKA7JCEU9yVe4i1nmiPnxc")
+const resend = new Resend("re_fpPNNhHh_Lj6C9s3fos5jvLveUMCi6wsh");
 
 type sendEmailProps = {
     title: string;
