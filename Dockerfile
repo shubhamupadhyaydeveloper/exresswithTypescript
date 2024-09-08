@@ -16,4 +16,4 @@ COPY . .
 # Expose the port
 EXPOSE 3000
 
-CMD [ "node", "/src/app.ts" ]
+CMD [ "node", "./src/app.ts" ]
