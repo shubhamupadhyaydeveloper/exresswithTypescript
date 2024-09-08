@@ -111,31 +111,30 @@ export async function verifyEmail(
 
     const alreadyVerified = await userModel.findOne({ otp, isVerified: true });
     if (alreadyVerified)
-      return res.send(200).json({ message: "user is already verified" });
+      return res.status(400).json({ message: "User is already verified" });
 
     const userFound = await userModel.findOne({ otp });
-    if (!userFound) return res.status(404).json({ message: "user not found" });
+    if (!userFound) return res.status(404).json({ message: "User not found" });
 
     const notExpired = new Date(userFound.otpExpiry) > new Date();
-
     if (!notExpired)
-      return res
-        .status(400)
-        .json({ message: "code time is expired try again" });
+      return res.status(400).json({ message: "Code has expired, try again" });
 
     if (userFound && notExpired) {
       userFound.isVerified = true;
-      userFound.otpExpiry = new Date(0);
-      userFound.otp = "";
+      userFound.otpExpiry = new Date(0); 
+      userFound.otp = ""; 
 
       await userFound.save();
 
-      return res.status(200).json({ message: "user verified successful" });
+      return res.status(200).json({ message: "User verified successfully" });
     }
   } catch (error: any) {
-    console.log("error in verifyUser", error?.message);
+    console.error("Error in verifyEmail:", error.message);
+    return res.status(500).json({ message: "Internal server error" }); // Return error response
   }
 }
+
 
 export async function forgetPassword(
   req: Request<{}, {}, { email: string }>,
