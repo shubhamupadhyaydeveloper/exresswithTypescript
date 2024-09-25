@@ -125,7 +125,13 @@ export async function createAudio(
         secure_url: string | undefined;
       } = await new Promise((resolve, reject) => {
         cloudinary.uploader
-          .upload_stream({}, function (error, result) {
+          .upload_stream({
+            resource_type : "image",
+            transformation :  {
+              quality : "auto:eco",
+              format : 'webp'
+            }
+          }, function (error, result) {
             if (error) {
               reject(error);
               return;
@@ -153,7 +159,12 @@ export async function createAudio(
         secure_url: string | undefined;
       } = await new Promise((resolve, reject) => {
         cloudinary.uploader
-          .upload_stream({}, function (error, result) {
+          .upload_stream({
+            resource_type : "auto",
+            transformation : {
+              quality : 'auto'
+            }
+          }, function (error, result) {
             if (error) {
               reject(error);
               return;

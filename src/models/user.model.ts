@@ -1,6 +1,5 @@
 import mongoose , {Model, Schema} from "mongoose";
 import { userModelType } from "@/validation/user";
-import { string } from "joi";
 
 const userSchema = new Schema<userModelType>({
     username : {
@@ -55,6 +54,9 @@ const userSchema = new Schema<userModelType>({
         type : Object,
         secure_url : String,
         public_id : String,
+    },
+    userDeviceToken : {
+        type : String
     }
 },{timestamps : true});
 
