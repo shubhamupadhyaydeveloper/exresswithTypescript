@@ -96,6 +96,8 @@ export async function createAudio(
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     const { title, about, category , singer } = req.body;
 
+    if(!files.video) return res.status(400).json({message :"audio is required for create song"})
+
     const createSong = new songModel({
       title,
       about,

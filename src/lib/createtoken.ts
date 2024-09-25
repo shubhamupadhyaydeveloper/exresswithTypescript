@@ -1,20 +1,19 @@
 import { Response } from "express"
 import jwt from "jsonwebtoken"
 import { Types } from "mongoose"
-import { JWT_TOKEN } from "./variable"
 
-const createToken = async (userId : Types.ObjectId,res:Response) => {
+const createToken = async (userId : Types.ObjectId) => {
     try {
-     const token = jwt.sign({userId},JWT_TOKEN!, {
-        expiresIn : "15d"
+     const accessToken = jwt.sign({userId}, process.env.JWT_TOKEN as string, {
+        expiresIn : "1h"
      })
 
-     res.cookie("token",token,{
-        maxAge: 15 * 24 * 60 * 60 * 1000, 
-        httpOnly : true
-     })
+     const refreshToken = jwt.sign({ userId }, process.env.REFRESH_TOKEN as string,{
+         expiresIn : '30d'
+     });
 
-     return token
+     return {accessToken,refreshToken}
+    
     } catch (error) {
       console.log("error in createToken")
     }

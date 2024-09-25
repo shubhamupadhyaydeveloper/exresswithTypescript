@@ -11,7 +11,7 @@ export async function signUpUser(
   try {
     const { username, email, password } = req.body;
 
-    console.log(username,email,password)
+    console.log(username, email, password);
 
     const userFound = await userModel.findOne({ email, isVerified: false });
 
@@ -19,9 +19,9 @@ export async function signUpUser(
       email,
       isVerified: true,
     });
-   
+
     if (alreadyVerified) {
-      console.log(alreadyVerified)
+      console.log(alreadyVerified);
       return res.status(400).json({ error: "User already verified" });
     }
 
@@ -42,7 +42,9 @@ export async function signUpUser(
 
       await userFound.save();
       sendEmail({ code: userFound.otp, email, title: "Signup", username });
-      return res.status(201).json({ message: "check your mail for verification" });
+      return res
+        .status(201)
+        .json({ message: "check your mail for verification" });
     }
 
     const createUser = new userModel({
@@ -57,7 +59,9 @@ export async function signUpUser(
 
     sendEmail({ code: createUser.otp, email, title: "Signup", username });
 
-    return res.status(201).json({ message: "check your mail for verification" });
+    return res
+      .status(201)
+      .json({ message: "check your mail for verification" });
   } catch (error: any) {
     console.log("error in sign upUser");
     res.json({ success: false, message: error.message });
@@ -70,9 +74,8 @@ export async function loginUser(
 ) {
   try {
     const { email, password } = req.body;
-    console.log(email ,password)
+    console.log(email, password);
     const userFound = await userModel.findOne({ email, isVerified: true });
-    
 
     if (!userFound)
       return res
@@ -84,16 +87,19 @@ export async function loginUser(
       return res.status(400).json({ message: "password is incorrect" });
 
     if (userFound && matchedPassword) {
-      createToken(userFound._id, res);
+      const token = await createToken(userFound._id);
+      return res.status(200).json({
+        accessToken: token!.accessToken,
+        refreshToken: token!.refreshToken,
+        userId : userFound._id
+      });
     }
-
-   return res
-      .status(200)
-      .json({ userDetail: userFound, message: "sign in successful" });
   } catch (error: any) {
     console.log("error in login user", error?.message);
   }
 }
+
+export async function refreshToken(req: Request, res: Response) {}
 
 export async function logout(req: Request, res: Response) {
   try {
