@@ -19,7 +19,6 @@ export type userModelType = {
       secure_url : string,
       public_id : string
    }
-   deviceToken : string
 }
 
 

@@ -1,9 +1,8 @@
-import e, { json, Request, Response } from "express";
+import { Request, Response } from "express";
 import userModel from "@/models/user.model";
 import bcrypt from "bcrypt";
 import createToken from "@/lib/createtoken";
 import { sendEmail } from "@/lib/sendemail";
-import jwt from "jsonwebtoken";
 
 export async function signUpUser(
   req: Request<{}, {}, { username: string; email: string; password: string }>,
@@ -12,7 +11,7 @@ export async function signUpUser(
   try {
     const { username, email, password } = req.body;
 
-    console.log(username, email, password);
+    console.log(username,email,password)
 
     const userFound = await userModel.findOne({ email, isVerified: false });
 
@@ -20,9 +19,9 @@ export async function signUpUser(
       email,
       isVerified: true,
     });
-
+   
     if (alreadyVerified) {
-      console.log(alreadyVerified);
+      console.log(alreadyVerified)
       return res.status(400).json({ error: "User already verified" });
     }
 
@@ -43,9 +42,7 @@ export async function signUpUser(
 
       await userFound.save();
       sendEmail({ code: userFound.otp, email, title: "Signup", username });
-      return res
-        .status(201)
-        .json({ message: "check your mail for verification" });
+      return res.status(201).json({ message: "check your mail for verification" });
     }
 
     const createUser = new userModel({
@@ -60,13 +57,10 @@ export async function signUpUser(
 
     sendEmail({ code: createUser.otp, email, title: "Signup", username });
 
-    return res
-      .status(201)
-      .json({ message: "check your mail for verification" });
+    return res.status(201).json({ message: "check your mail for verification" });
   } catch (error: any) {
-       res
-         .status(500)
-         .json({ message: `error in signup user, ${error?.message}` });
+    console.log("error in sign upUser");
+    res.json({ success: false, message: error.message });
   }
 }
 
@@ -76,8 +70,9 @@ export async function loginUser(
 ) {
   try {
     const { email, password } = req.body;
-
+    console.log(email ,password)
     const userFound = await userModel.findOne({ email, isVerified: true });
+    
 
     if (!userFound)
       return res
@@ -89,55 +84,14 @@ export async function loginUser(
       return res.status(400).json({ message: "password is incorrect" });
 
     if (userFound && matchedPassword) {
-      const token = createToken(userFound._id);
-      return res.status(200).json({
-        accesstoken: token?.accessToken,
-        refreshtoken: token?.refreshToken,
-        userId : userFound._id
-      });
+      createToken(userFound._id, res);
     }
+
+   return res
+      .status(200)
+      .json({ userDetail: userFound, message: "sign in successful" });
   } catch (error: any) {
-       res
-         .status(500)
-         .json({ message: `error in login user, ${error?.message}` });
-  }
-}
-
-export async function refreshToken(
-  req: Request<{}, {}, { refreshToken: string }>,
-  res: Response
-) {
-  try {
-    const { refreshToken } = req.body;
-
-    if (!refreshToken)
-      return res.status(400).json({ message: "refresh Token is required" });
-
-    const { userId } = jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN as string
-    ) as { userId: string };
-
-    const userFound = await userModel.findById(userId);
-
-    if (!userFound)
-      res
-        .status(400)
-        .json({ message: "try login again , Invalid refresh Token" });
-
-    const newRefreshToken = createToken(userFound!._id);
-
-    return res
-      .status(201)
-      .json({
-        message: "Token verify successful",
-        refreshToken: newRefreshToken?.refreshToken,
-        accessToken: newRefreshToken?.accessToken,
-      });
-  } catch (error: any) {
-    res
-      .status(500)
-      .json({ message: `error in refresh token, ${error?.message}` });
+    console.log("error in login user", error?.message);
   }
 }
 
@@ -146,9 +100,7 @@ export async function logout(req: Request, res: Response) {
     res.cookie("token", "", { maxAge: 1 });
     res.json({ success: true, message: "logout successful" });
   } catch (error: any) {
-      res
-        .status(500)
-        .json({ message: `error in logout, ${error?.message}` });
+    console.log("error in logout", error?.message);
   }
 }
 
@@ -183,9 +135,7 @@ export async function verifyEmail(
       return res.status(200).json({ message: "user verified successful" });
     }
   } catch (error: any) {
-      res
-        .status(500)
-        .json({ message: `error in verify email, ${error?.message}` });
+    console.log("error in verifyUser", error?.message);
   }
 }
 
@@ -222,9 +172,7 @@ export async function forgetPassword(
       .status(200)
       .json({ message: "check your email for email verify" });
   } catch (error: any) {
-      res
-        .status(500)
-        .json({ message: `error in forgot password, ${error?.message}` });
+    console.log("error in forgetPassword", error?.message);
   }
 }
 
@@ -258,8 +206,6 @@ export async function resetPassword(
       res.status(201).json({ message: "password update successful" });
     }
   } catch (error: any) {
-      res
-        .status(500)
-        .json({ message: `error in reset password, ${error?.message}` });
+    console.log("error in resetPassword", error?.message);
   }
 }

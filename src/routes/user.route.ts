@@ -1,5 +1,5 @@
 import {Router} from "express"
-import { forgetPassword, loginUser, logout, refreshToken, resetPassword, signUpUser,verifyEmail } from "@/controllers/user.controler"
+import { forgetPassword, loginUser, logout, resetPassword, signUpUser,verifyEmail } from "@/controllers/user.controler"
 import { validate } from "@/middleware/validate"
 import { loginClientDataType, signUpClientDataType } from "@/validation/user"
 
@@ -11,6 +11,5 @@ router.post("/login", validate(loginClientDataType), loginUser)
 router.post("/verify-email",verifyEmail)
 router.post("/forget-password",forgetPassword)
 router.post("/forget-password/:token",resetPassword)
-router.post("/refresh",refreshToken)
 
 export default router;

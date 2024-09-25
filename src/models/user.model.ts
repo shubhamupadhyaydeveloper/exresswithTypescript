@@ -55,11 +55,6 @@ const userSchema = new Schema<userModelType>({
         type : Object,
         secure_url : String,
         public_id : String,
-    },
-    deviceToken : {
-        type : String,
-        required : true,
-        unique : true
     }
 },{timestamps : true});
 
