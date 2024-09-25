@@ -1,3 +1,4 @@
+import Joi from "joi"
 import { ObjectId, Types } from "mongoose"
 
 export type songCategory = "Romantic" | "Classic" | "Modern" | "Punjabi" | "English" | "Rap"
@@ -18,3 +19,17 @@ export type songModelType = {
      category : songCategory,
      singer : string
 }
+
+
+export const songClientDataType = Joi.object({
+  title: Joi.string().required(),
+  about: Joi.string().required(),
+  singer: Joi.string().required(),
+  category: Joi.string().valid(
+    "Romantic",
+    "Classic",
+    "Modern",
+    "English",
+    "Rap"
+  ).required(),
+});
