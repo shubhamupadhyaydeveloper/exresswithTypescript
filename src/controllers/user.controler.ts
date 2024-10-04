@@ -3,17 +3,24 @@ import userModel from "@/models/user.model";
 import bcrypt from "bcrypt";
 import createToken from "@/lib/createtoken";
 import { sendEmail } from "@/lib/sendemail";
+import sharp from "sharp";
+import jwt from "jsonwebtoken";
 
 export async function signUpUser(
-  req: Request<{}, {}, { username: string; email: string; password: string }>,
+  req: Request<
+    {},
+    {},
+    {
+      username: string;
+      email: string;
+      password: string;
+      method: string;
+      userDeviceToken : string }
+  >,
   res: Response
 ) {
   try {
-    const { username, email, password } = req.body;
-
-    console.log(username, email, password);
-
-    const userFound = await userModel.findOne({ email, isVerified: false });
+    const { username, email, password, method,userDeviceToken } = req.body;
 
     const alreadyVerified = await userModel.findOne({
       email,
@@ -25,14 +32,38 @@ export async function signUpUser(
       return res.status(400).json({ error: "User already verified" });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    if (method === "google") {
+      const createUser = await userModel.create({
+        username,
+        email,
+        password: hashedPassword,
+        otpExpiry: new Date(0),
+        otp: "null",
+        isVerified: true,
+        authMethod: "google",
+        userDeviceToken : userDeviceToken ?? ""
+      });
+
+      await createUser.save();
+      const token = await createToken(createUser._id);
+      return res.status(201).json({
+        accessToken: token!.accessToken,
+        refreshToken: token!.refreshToken,
+        userId: createUser._id,
+        message: "sign up succesful",
+      });
+    }
+
+    const userFound = await userModel.findOne({ email, isVerified: false });
+
     const codeGenerator = (): string => {
       return Math.floor(100000 + Math.random() * 900000).toString();
     };
 
     const codeExpiry = new Date();
     codeExpiry.setHours(codeExpiry.getHours() + 1);
-
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     if (userFound) {
       userFound.password = hashedPassword;
@@ -53,6 +84,8 @@ export async function signUpUser(
       password: hashedPassword,
       otp: codeGenerator(),
       otpExpiry: codeExpiry,
+      authMethod: "manual",
+      userDeviceToken: userDeviceToken ?? "",
     });
 
     await createUser.save();
@@ -63,8 +96,7 @@ export async function signUpUser(
       .status(201)
       .json({ message: "check your mail for verification" });
   } catch (error: any) {
-    console.log("error in sign upUser");
-    res.json({ success: false, message: error.message });
+    res.status(500).json({ message: `error in signup user ${error?.message}` });
   }
 }
 
@@ -74,7 +106,7 @@ export async function loginUser(
 ) {
   try {
     const { email, password } = req.body;
-    console.log(email, password);
+
     const userFound = await userModel.findOne({ email, isVerified: true });
 
     if (!userFound)
@@ -91,22 +123,57 @@ export async function loginUser(
       return res.status(200).json({
         accessToken: token!.accessToken,
         refreshToken: token!.refreshToken,
-        userId : userFound._id
+        userId: userFound._id,
       });
     }
   } catch (error: any) {
-    console.log("error in login user", error?.message);
+       res
+         .status(500)
+         .json({ message: `error in login user  ${error?.message}` });
   }
 }
 
-export async function refreshToken(req: Request, res: Response) {}
+export async function refreshToken(
+  req: Request<{}, {}, { refreshToken: string }>,
+  res: Response
+) {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken)
+      res.status(400).json({ message: "refresh token is required" });
+
+    console.log(refreshToken)
+
+    const { userId } = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN as string
+    ) as {
+      userId: string;
+    };
+
+    const findUser = await userModel.findById(userId)
+    if(!findUser) return res.status(400).json({ message: "invalid refresh token" });
+
+    const token = await createToken(findUser._id);
+    return res.status(200).json({
+      accessToken: token!.accessToken,
+      refreshToken: token!.refreshToken,
+    });
+
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: `error in refresh token ${error?.message}` });
+  }
+}
 
 export async function logout(req: Request, res: Response) {
   try {
     res.cookie("token", "", { maxAge: 1 });
     res.json({ success: true, message: "logout successful" });
   } catch (error: any) {
-    console.log("error in logout", error?.message);
+    res.status(500).json({ message: `error in logout ${error?.message}` });
   }
 }
 
@@ -141,7 +208,7 @@ export async function verifyEmail(
       return res.status(200).json({ message: "user verified successful" });
     }
   } catch (error: any) {
-    console.log("error in verifyUser", error?.message);
+      res.status(500).json({ message: `error in verify user  ${error?.message}` });
   }
 }
 
@@ -178,7 +245,7 @@ export async function forgetPassword(
       .status(200)
       .json({ message: "check your email for email verify" });
   } catch (error: any) {
-    console.log("error in forgetPassword", error?.message);
+      res.status(500).json({ message: `error in forgot password  ${error?.message}` });
   }
 }
 
@@ -212,6 +279,6 @@ export async function resetPassword(
       res.status(201).json({ message: "password update successful" });
     }
   } catch (error: any) {
-    console.log("error in resetPassword", error?.message);
+     res.status(500).json({ message: `error in reset password ${error?.message}` });
   }
 }

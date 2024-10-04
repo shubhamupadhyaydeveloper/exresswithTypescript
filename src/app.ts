@@ -4,6 +4,7 @@ import userRoute from "@/routes/user.route";
 import validUserRoute from "@/routes/validuser.route";
 import publicRoute from "@/routes/public.route";
 import registetTokenRoute from "@/routes/notification.route"
+import shareLinkRoute from '@/routes/share.route'
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 import { connectedToMongodb } from "@/lib/mongo.connect";
@@ -21,6 +22,8 @@ app.use("/auth", userRoute);
 app.use("/user", validUserRoute);
 app.use("/public", publicRoute);
 app.use("/notification",registetTokenRoute)
+app.use("/sharelink",shareLinkRoute);
+
 
 app.get("/", (req, res) => {
   res.json({ message: "welcome to my website" });

@@ -19,7 +19,8 @@ export type userModelType = {
       secure_url : string,
       public_id : string
    }
-   userDeviceToken : string
+   userDeviceToken : string,
+   authMethod : 'manual' | 'google'
 }
 
 
@@ -27,6 +28,7 @@ export const signUpClientDataType = J.object({
     username : J.string().required(),
     email : J.string().email().required(),
     password :  J.string().required(),
+    method : J.string().valid('manual','google').required()
 })
 
 

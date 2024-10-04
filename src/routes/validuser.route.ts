@@ -1,4 +1,4 @@
-import { createAudio, updateProfile,createPlaylist, updatePlaylist } from "@/controllers/validuser.controler";
+import { createAudio, updateProfile,createPlaylist, updatePlaylist, userDetail } from "@/controllers/validuser.controler";
 import { validate } from "@/middleware/validate";
 import { verifyUser } from "@/middleware/verifyuser";
 import { playlistClientDataType, updatePlaylistClientDataType } from "@/validation/playlist";
@@ -22,5 +22,6 @@ router.post(
 
 router.post("/create-playlist",verifyUser, validate(playlistClientDataType) , createPlaylist)
 router.post("/update-playlist",verifyUser, validate(updatePlaylistClientDataType),updatePlaylist)
+router.post("/userdetail",verifyUser,userDetail)
 
 export default router;

@@ -1,7 +1,6 @@
 import e, { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import userModel from "@/models/user.model";
-import { JWT_TOKEN } from "@/lib/variable";
 
 export const verifyUser = async (
   req: Request,
@@ -11,7 +10,7 @@ export const verifyUser = async (
   try {
     const header = req.headers["authorization"];
 
-    if (!header) res.status(400).json({ message: "refresh token is required" });
+    if (!header) return res.status(400).json({ message: "access token is required" });
 
     const token = header?.split(" ")[1] as string;
 
@@ -21,15 +20,16 @@ export const verifyUser = async (
 
     const userFound = await userModel.findById(userId);
 
-    if (!userFound)
-      res.status(400).json({ message: "Invalid token , try login again" });
+    if (!userFound) return  res.status(404).json({ message: "Invalid token , try login again" });
+
+    console.log('someone call this',userFound)
 
     req.user = userFound;
 
     next();
   } catch (error: any) {
     res
-      .status(500)
+      .status(401)
       .json({ message: `error in verifyuser middleware ${error?.message}` });
   }
 };
