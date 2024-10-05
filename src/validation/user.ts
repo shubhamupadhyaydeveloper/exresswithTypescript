@@ -30,11 +30,12 @@ export type TuserDto = userModelType & {
 };
 
 export const signUpClientDataType = J.object({
-  username: J.string().required(),
-  email: J.string().email().required(),
-  password: J.string().required(),
-  method: J.string().valid("manual", "google").required(),
-});
+    username : J.string().required(),
+    email : J.string().email().required(),
+    password :  J.string().required(),
+    method : J.string().valid('manual','google').required()
+})
+
 
 export const loginClientDataType = J.object({
   password: J.string().required(),
