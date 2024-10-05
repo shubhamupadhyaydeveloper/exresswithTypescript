@@ -23,7 +23,7 @@ export async function shareLink(
         findSong?.thumbnail.secure_url ||
         "https://images.unsplash.com/photo-1727189899371-abd5873c4709?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxOXx8fGVufDB8fHx8fA%3D%3D";
 
-      url = `http://192.168.1.109:3000/sharelink/song/${findSong?._id}`;
+      url = `https://beatify-9fmh.onrender.com/sharelink/song/${findSong?._id}`;
       singer = findSong?.singer;
       releasedDate = findSong?.createdAt.toString().slice(0, 15);
     }
