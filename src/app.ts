@@ -24,9 +24,11 @@ app.use("/public", publicRoute);
 app.use("/notification",registetTokenRoute)
 app.use("/sharelink",shareLinkRoute);
 
-
+ 
 app.get("/", (req, res) => {
   res.json({ message: "welcome to my website" });
 });
 
 app.listen(port, () => console.log(`port is listining ${port}`));
+
+  

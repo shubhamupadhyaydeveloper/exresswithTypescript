@@ -22,13 +22,11 @@ function signUpUser(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { username, email, password, method, userDeviceToken } = req.body;
-            console.log(username, email);
             const alreadyVerified = yield user_model_1.default.findOne({
                 email,
                 isVerified: true,
             });
             if (alreadyVerified) {
-                console.log(alreadyVerified);
                 return res.status(400).json({ error: "User already verified" });
             }
             const hashedPassword = yield bcrypt_1.default.hash(password, 10);
@@ -125,7 +123,6 @@ function refreshToken(req, res) {
             const { refreshToken } = req.body;
             if (!refreshToken)
                 res.status(400).json({ message: "refresh token is required" });
-            console.log(refreshToken);
             const { userId } = jsonwebtoken_1.default.verify(refreshToken, process.env.REFRESH_TOKEN);
             const findUser = yield user_model_1.default.findById(userId);
             if (!findUser)

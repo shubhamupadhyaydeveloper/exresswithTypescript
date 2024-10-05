@@ -21,7 +21,6 @@ export async function signUpUser(
 ) {
   try {
     const { username, email, password, method,userDeviceToken } = req.body;
-    console.log(username,email)
 
     const alreadyVerified = await userModel.findOne({
       email,
@@ -29,7 +28,6 @@ export async function signUpUser(
     });
 
     if (alreadyVerified) {
-      console.log(alreadyVerified);
       return res.status(400).json({ error: "User already verified" });
     }
 
@@ -143,8 +141,6 @@ export async function refreshToken(
 
     if (!refreshToken)
       res.status(400).json({ message: "refresh token is required" });
-
-    console.log(refreshToken)
 
     const { userId } = jwt.verify(
       refreshToken,

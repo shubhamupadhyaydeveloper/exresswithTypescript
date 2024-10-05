@@ -25,7 +25,6 @@ const verifyUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         const userFound = yield user_model_1.default.findById(userId);
         if (!userFound)
             return res.status(404).json({ message: "Invalid token , try login again" });
-        console.log('someone call this', userFound);
         req.user = userFound.toObject();
         next();
     }

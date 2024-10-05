@@ -22,7 +22,6 @@ export const verifyUser = async (
 
     if (!userFound) return  res.status(404).json({ message: "Invalid token , try login again" });
 
-    console.log('someone call this',userFound)
 
     req.user = userFound.toObject();
 
