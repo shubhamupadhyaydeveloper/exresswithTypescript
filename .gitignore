@@ -1,6 +1,6 @@
 .vercel
 .env
 node_modules
-.key.json
+./key.json
 key.json
 Dockerfile

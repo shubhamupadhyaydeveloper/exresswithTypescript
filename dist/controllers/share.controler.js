@@ -31,18 +31,19 @@ function shareLink(req, res) {
                 singer = findSong === null || findSong === void 0 ? void 0 : findSong.singer;
                 releasedDate = findSong === null || findSong === void 0 ? void 0 : findSong.createdAt.toString().slice(0, 15);
             }
-            res.send(`
+            res.setHeader("Content-Type", "text/html").send(`
       <!DOCTYPE html>
       <html lang="en">
       <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>${title}</title>
-          <meta property="og:title" content="${title}">
-          <meta property="og:description" content="${description}">
-          <meta property="og:image" content="${imageUrl}">
-          <meta property="og:url" content="${url}">
-          <meta property="og:type" content="website">
+         <meta property="og:title" content="${title}">
+<meta property="og:description" content="${description}">
+<meta property="og:image" content="${imageUrl}">
+<meta property="og:url" content="${url}">
+<meta property="og:type" content="website">
+
           <style>
               body {
                   background-color: #121212;
