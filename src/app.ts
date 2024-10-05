@@ -10,7 +10,7 @@ import cookieParser from "cookie-parser";
 import { connectedToMongodb } from "@/lib/mongo.connect";
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 // connect To mongodb
 connectedToMongodb();

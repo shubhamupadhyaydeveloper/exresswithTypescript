@@ -13,7 +13,7 @@ require("dotenv/config");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const mongo_connect_1 = require("./lib/mongo.connect");
 const app = (0, express_1.default)();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 // connect To mongodb
 (0, mongo_connect_1.connectedToMongodb)();
 app.use(express_1.default.json());
