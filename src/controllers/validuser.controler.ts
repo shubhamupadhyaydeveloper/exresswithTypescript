@@ -113,7 +113,7 @@ export async function createAudio(
     const createSong = new songModel({
       title,
       about,
-      owner: currentUser._id,
+      owner: currentUser!._id,
       category,
       singer,
     });

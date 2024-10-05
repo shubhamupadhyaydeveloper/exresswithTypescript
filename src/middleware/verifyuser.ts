@@ -24,7 +24,7 @@ export const verifyUser = async (
 
     console.log('someone call this',userFound)
 
-    req.user = userFound;
+    req.user = userFound.toObject();
 
     next();
   } catch (error: any) {
