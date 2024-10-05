@@ -21,6 +21,7 @@ export async function signUpUser(
 ) {
   try {
     const { username, email, password, method,userDeviceToken } = req.body;
+    console.log(username,email)
 
     const alreadyVerified = await userModel.findOne({
       email,

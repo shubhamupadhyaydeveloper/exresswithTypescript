@@ -25,11 +25,12 @@ export type userModelType = {
 
 
 export const signUpClientDataType = J.object({
-    username : J.string().required(),
-    email : J.string().email().required(),
-    password :  J.string().required(),
-    method : J.string().valid('manual','google').required()
-})
+  username: J.string().required(),
+  email: J.string().email().required(),
+  password: J.string().required(),
+  method: J.string().valid("manual", "google").required(),
+  userDeviceToken : J.string().optional()
+});
 
 
 export const loginClientDataType = J.object({
