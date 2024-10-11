@@ -28,7 +28,10 @@ export async function shareLink(
       releasedDate = findSong?.createdAt.toString().slice(0, 15);
     }
 
-    res.setHeader("Content-Type", "text/html").send(`
+    res
+      .setHeader("Pragma", "no-cache")
+      .setHeader("Cache-Control", "no-cache, no-store, must-revalidate")
+      .setHeader("Content-Type", "text/html").send(`
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -36,10 +39,12 @@ export async function shareLink(
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>${title}</title>
          <meta property="og:title" content="${title}">
-<meta property="og:description" content="${description}">
-<meta property="og:image" content="${imageUrl}">
-<meta property="og:url" content="${url}">
-<meta property="og:type" content="website">
+              <meta property="og:description" content="${description}">
+              <meta property="og:image" content="${imageUrl}">
+              <meta property="og:url" content="${url}">
+             <meta property="og:type" content="${
+               type === "song" ? "music.song" : "music.playlist"
+             }">
 
           <style>
               body {
