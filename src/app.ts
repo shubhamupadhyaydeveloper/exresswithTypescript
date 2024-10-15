@@ -8,6 +8,7 @@ import shareLinkRoute from '@/routes/share.route'
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 import { connectedToMongodb } from "@/lib/mongo.connect";
+import path from 'path'
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,6 +19,8 @@ connectedToMongodb();
 app.use(express.json());
 app.use(cookieParser());
 
+
+app.use("/.well-known", express.static(path.join(__dirname, ".well-known")));
 app.use("/auth", userRoute);
 app.use("/user", validUserRoute);
 app.use("/public", publicRoute);
